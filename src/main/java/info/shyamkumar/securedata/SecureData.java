@@ -1,10 +1,11 @@
-package org.securedata;
+package info.shyamkumar.securedata;
 
-import org.securedata.config.MaskingProperties;
-import org.securedata.helper.SecureDataAspect;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+
+import info.shyamkumar.securedata.config.SecureMaskingProperties;
+import info.shyamkumar.securedata.helper.SecureDataAspect;
 
 @Configuration
 @EnableAspectJAutoProxy
@@ -30,14 +31,9 @@ public class SecureData {
 	public SecureDataAspect responseModificationAspect() {
 		return new SecureDataAspect();
 	}
-
-	/**
-	 * Creates a bean for MaskingProperties.
-	 *
-	 * @return a new instance of MaskingProperties
-	 */
+	
 	@Bean
-	public MaskingProperties maskingProperties() {
-		return new MaskingProperties();
+	public SecureMaskingProperties maskingProperties() {
+		return SecureMaskingProperties.setConfig();
 	}
 }

@@ -1,18 +1,22 @@
-package org.securedata.helper.maskingstrategy;
+package info.shyamkumar.securedata.helper.maskingstrategy;
 
-import org.securedata.config.MaskingProperties;
+import info.shyamkumar.securedata.config.SecureMaskingProperties;
 
 public class MaskingStrategies {
+
+	private static final SecureMaskingProperties maskingProperties = SecureMaskingProperties.setConfig();
 
 	static String maskDefault(String value, int preFixLength, int postFixLength, char maskSymbol) {
 		String MASKED_SYMBOL = String.valueOf(maskSymbol);
 		if (preFixLength == 0)
-			preFixLength = MaskingProperties.normalPrefixLength;
+			preFixLength = maskingProperties.getNormalPrefixLength();
 		if (postFixLength == 0)
-			postFixLength = MaskingProperties.normalSuffixLength;
+			postFixLength = maskingProperties.getNormalSuffixLength();
 
-		preFixLength = checkLength(value, preFixLength);
-		postFixLength = checkLength(value, postFixLength);
+		int[] lengths = fixLength(preFixLength, postFixLength, value.length());
+
+		preFixLength = lengths[0];
+		postFixLength = lengths[1];
 
 		return MASKED_SYMBOL.repeat(Math.max(0, value.length() - (preFixLength + postFixLength)))
 				+ value.substring(Math.max(0, value.length() - postFixLength));
@@ -21,12 +25,14 @@ public class MaskingStrategies {
 	static String phoneMask(String value, int preFixLength, int postFixLength, char maskSymbol) {
 		String MASKED_SYMBOL = String.valueOf(maskSymbol);
 		if (preFixLength == 0)
-			preFixLength = MaskingProperties.phonePrefixLength;
+			preFixLength = maskingProperties.getPhonePrefixLength();
 		if (postFixLength == 0)
-			postFixLength = MaskingProperties.phoneSuffixLength;
+			postFixLength = maskingProperties.getPhoneSuffixLength();
 
-		preFixLength = checkLength(value, preFixLength);
-		postFixLength = checkLength(value, postFixLength);
+		int[] lengths = fixLength(preFixLength, postFixLength, value.length());
+
+		preFixLength = lengths[0];
+		postFixLength = lengths[1];
 
 		StringBuilder maskedPrefix = new StringBuilder();
 		if (value.length() <= (preFixLength + postFixLength) && value.length() < 3) {
@@ -48,6 +54,12 @@ public class MaskingStrategies {
 
 	static String emailMask(String email, int preFixLength, int postFixLength, char maskSymbol) {
 		String MASKED_SYMBOL = String.valueOf(maskSymbol);
+
+		if (preFixLength == 0)
+			preFixLength = maskingProperties.getEmailPrefixLength();
+		if (postFixLength == 0)
+			postFixLength = maskingProperties.getEmailSuffixLength();
+
 		StringBuilder emailMask = new StringBuilder();
 		String[] parts = email.split("@");
 
@@ -57,21 +69,25 @@ public class MaskingStrategies {
 		String prefix = parts[0];
 		String domain = parts[1];
 
+		int[] lengths = fixLength(preFixLength, postFixLength, prefix.length());
+
+		preFixLength = lengths[0];
+		postFixLength = lengths[1];
+
 		if (prefix.length() <= (preFixLength + postFixLength) || prefix.length() < 2) {
 			emailMask.append(MASKED_SYMBOL.repeat(prefix.length()));
 		} else {
-			preFixLength = checkLength(prefix, preFixLength);
-			postFixLength = checkLength(prefix, postFixLength);
 
-			emailMask.append(MASKED_SYMBOL.repeat(Math.max(0, prefix.length() - (preFixLength + postFixLength))))
-					.append(prefix.substring(Math.max(0, prefix.length() - postFixLength)));
+			emailMask.append(prefix, 0, preFixLength)
+					.append(MASKED_SYMBOL.repeat(prefix.length() - (preFixLength + postFixLength)))
+					.append(prefix.substring(prefix.length() - postFixLength));
 		}
 		emailMask.append("@").append(maskEmailDomain(domain, MASKED_SYMBOL));
 		return emailMask.toString();
 	}
 
 	private static String maskEmailDomain(String domain, String MASKED_SYMBOL) {
-		if (MaskingProperties.isEmailDomainMask) {
+		if (maskingProperties.isEmailDomainMask()) {
 			StringBuilder masked = new StringBuilder();
 			String[] domainParts = domain.split("\\.");
 			for (int i = 0; i < domainParts.length; i++) {
@@ -94,16 +110,17 @@ public class MaskingStrategies {
 		String MASKED_SYMBOL = String.valueOf(maskSymbol);
 
 		if (preFixLength == 0)
-			preFixLength = MaskingProperties.cardPrefixLength;
+			preFixLength = maskingProperties.getCardPrefixLength();
 		if (postFixLength == 0)
-			postFixLength = MaskingProperties.cardSuffixLength;
+			postFixLength = maskingProperties.getCardSuffixLength();
 
-		preFixLength = checkLength(value, preFixLength);
-		postFixLength = checkLength(value, postFixLength);
+		int[] lengths = fixLength(preFixLength, postFixLength, value.length());
 
+		preFixLength = lengths[0];
+		postFixLength = lengths[1];
 		int maskLength = value.length() - preFixLength - postFixLength;
 		if (value.length() > preFixLength + postFixLength) {
-			maskedValue.append(value.substring(0, preFixLength)).append(MASKED_SYMBOL.repeat(maskLength))
+			maskedValue.append(value, 0, preFixLength).append(MASKED_SYMBOL.repeat(maskLength))
 					.append(value.substring(value.length() - postFixLength));
 		} else {
 			maskedValue.append(MASKED_SYMBOL.repeat(value.length()));
@@ -111,9 +128,12 @@ public class MaskingStrategies {
 		return maskedValue.toString();
 	}
 
-	private static int checkLength(String value, int length) {
-		if ((value.length() / 2) > length)
-			return length / 2;
-		return length;
+	private static int[] fixLength(int preFixLength, int postFixLength, int valueLength) {
+		if (valueLength < preFixLength + postFixLength) {
+			int min = Math.min(valueLength, preFixLength + postFixLength);
+			preFixLength = min / 2;
+			postFixLength = min - preFixLength;
+		}
+		return new int[] { preFixLength, postFixLength };
 	}
 }
