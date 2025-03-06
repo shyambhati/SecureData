@@ -1,4 +1,4 @@
-package org.securedata.helper.exception;
+package info.shyamkumar.securedata.helper.exception;
 
 public class SecureJsonException extends RuntimeException {
 public SecureJsonException(String message) {

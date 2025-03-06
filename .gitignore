@@ -56,4 +56,4 @@ replay_pid*
 
 
 # Ignore all files inside /org/securedata/testing/ there are tesing files
-src/main/java/org/securedata/testing/
+src/main/java/info/shyamkumar/securedata/testing/
