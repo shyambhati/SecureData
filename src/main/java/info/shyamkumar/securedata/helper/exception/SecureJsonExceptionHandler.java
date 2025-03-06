@@ -1,4 +1,4 @@
-package org.securedata.helper.exception;
+package info.shyamkumar.securedata.helper.exception;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

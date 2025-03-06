@@ -1,12 +1,14 @@
-package org.securedata.helper;
+package info.shyamkumar.securedata.helper;
 
 import java.util.List;
+
+import info.shyamkumar.securedata.annotation.Masked;
+
 import java.util.Collection;
 import java.util.LinkedList;
 import java.lang.reflect.Field;
-import org.securedata.annotation.Masked;
-import static org.securedata.helper.Masking.applyMasking;
-import static org.securedata.helper.ReflectionHelper.*;
+import static info.shyamkumar.securedata.helper.ReflectionHelper.*;
+import static info.shyamkumar.securedata.helper.Masking.*;
 
 public class ProcessFields {
 	public static void processFields(Object data) {
@@ -39,7 +41,8 @@ public class ProcessFields {
 				}
 
 				// Handle collections
-				if (fieldValue instanceof Collection<?> collection) {
+				if (fieldValue instanceof Collection<?>) {
+					    Collection<?> collection = (Collection<?>) fieldValue;
 					if (isStringCollection(collection))
 						continue;
 					collection.forEach(ProcessFields::processFields);

@@ -1,4 +1,4 @@
-package org.securedata.helper.maskingstrategy;
+package info.shyamkumar.securedata.helper.maskingstrategy;
 
 import java.util.HashMap;
 import java.util.Map;

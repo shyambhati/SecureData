@@ -1,10 +1,10 @@
-package org.securedata.helper;
+package info.shyamkumar.securedata.helper;
+
+import static info.shyamkumar.securedata.SecureData.processData;
 
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
-
-import static org.securedata.SecureData.processData;
 
 @Aspect
 @Component
